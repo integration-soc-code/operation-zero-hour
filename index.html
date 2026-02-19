@@ -91,21 +91,52 @@ Position (1-5): <input type="number" id="position" min="1" max="5">
 
 <script>
 
-let hp = 1000;
-let teamLocked = false;
+const finalCode = "75183";
+
+let hp = localStorage.getItem("hp") ? parseInt(localStorage.getItem("hp")) : 1000;
+let teamLocked = localStorage.getItem("teamLocked") === "true";
 
 let eliminationOrder = [9,4,0,2,6];
-let eliminationIndex = 0;
+let eliminationIndex = localStorage.getItem("elimIndex") ? parseInt(localStorage.getItem("elimIndex")) : 0;
 
-let sumPurchased = false;
-let largestPurchased = false;
-let smallestPurchased = false;
+let sumPurchased = localStorage.getItem("sumPurchased") === "true";
+let largestPurchased = localStorage.getItem("largestPurchased") === "true";
+let smallestPurchased = localStorage.getItem("smallestPurchased") === "true";
 
-const finalCode = "75183";
+window.onload = function(){
+
+    document.getElementById("hp").innerText = hp;
+
+    if(teamLocked){
+        let savedName = localStorage.getItem("teamName");
+        document.getElementById("teamName").value = savedName;
+        document.getElementById("teamName").disabled = true;
+        document.querySelector("#teamName + button").disabled = true;
+        document.getElementById("teamStatus").innerText = "Team Locked: " + savedName;
+    }
+
+    for(let i=0;i<eliminationIndex;i++){
+        document.getElementById("elimResults").innerHTML +=
+        "<p>Digit NOT in code: " + eliminationOrder[i] + "</p>";
+    }
+
+    if(sumPurchased){
+        document.getElementById("sumResult").innerText = "Sum of digits = 24";
+    }
+
+    if(largestPurchased){
+        document.getElementById("extremeResult").innerHTML += "<p>Largest digit is in Position 4</p>";
+    }
+
+    if(smallestPurchased){
+        document.getElementById("extremeResult").innerHTML += "<p>Smallest digit is in Position 3</p>";
+    }
+};
 
 function updateHP(cost){
     if(hp >= cost){
         hp -= cost;
+        localStorage.setItem("hp", hp);
         document.getElementById("hp").innerText = hp;
         return true;
     } else {
@@ -120,10 +151,14 @@ function lockTeam(){
         alert("Enter team name");
         return;
     }
+
+    localStorage.setItem("teamName", name);
+    localStorage.setItem("teamLocked", "true");
+
     document.getElementById("teamName").disabled = true;
-    document.querySelector("#teamName + button").classList.add("locked");
     document.querySelector("#teamName + button").disabled = true;
     document.getElementById("teamStatus").innerText = "Team Locked: " + name;
+
     teamLocked = true;
 }
 
@@ -136,9 +171,58 @@ function buyElimination(){
     }
 
     if(updateHP(30)){
-        let div = document.getElementById("elimResults");
-        div.innerHTML += "<p>Digit NOT in code: " + eliminationOrder[eliminationIndex] + "</p>";
+        document.getElementById("elimResults").innerHTML +=
+        "<p>Digit NOT in code: " + eliminationOrder[eliminationIndex] + "</p>";
+
         eliminationIndex++;
+        localStorage.setItem("elimIndex", eliminationIndex);
+    }
+}
+
+function buySum(){
+    if(!teamLocked){ alert("Lock team name first"); return; }
+
+    if(sumPurchased){
+        alert("Already purchased");
+        return;
+    }
+
+    if(updateHP(90)){
+        document.getElementById("sumResult").innerText = "Sum of digits = 24";
+        localStorage.setItem("sumPurchased", "true");
+        sumPurchased = true;
+    }
+}
+
+function buyLargest(){
+    if(!teamLocked){ alert("Lock team name first"); return; }
+
+    if(largestPurchased){
+        alert("Largest already revealed");
+        return;
+    }
+
+    if(updateHP(120)){
+        document.getElementById("extremeResult").innerHTML +=
+        "<p>Largest digit is in Position 4</p>";
+        localStorage.setItem("largestPurchased", "true");
+        largestPurchased = true;
+    }
+}
+
+function buySmallest(){
+    if(!teamLocked){ alert("Lock team name first"); return; }
+
+    if(smallestPurchased){
+        alert("Smallest already revealed");
+        return;
+    }
+
+    if(updateHP(120)){
+        document.getElementById("extremeResult").innerHTML +=
+        "<p>Smallest digit is in Position 3</p>";
+        localStorage.setItem("smallestPurchased", "true");
+        smallestPurchased = true;
     }
 }
 
@@ -162,48 +246,6 @@ function checkPosition(){
     }
 }
 
-function buySum(){
-    if(!teamLocked){ alert("Lock team name first"); return; }
-
-    if(sumPurchased){
-        alert("Already purchased");
-        return;
-    }
-
-    if(updateHP(90)){
-        document.getElementById("sumResult").innerText = "Sum of digits = 24";
-        sumPurchased = true;
-    }
-}
-
-function buyLargest(){
-    if(!teamLocked){ alert("Lock team name first"); return; }
-
-    if(largestPurchased){
-        alert("Largest position already revealed");
-        return;
-    }
-
-    if(updateHP(120)){
-        document.getElementById("extremeResult").innerHTML += "<p>Largest digit is in Position 4</p>";
-        largestPurchased = true;
-    }
-}
-
-function buySmallest(){
-    if(!teamLocked){ alert("Lock team name first"); return; }
-
-    if(smallestPurchased){
-        alert("Smallest position already revealed");
-        return;
-    }
-
-    if(updateHP(120)){
-        document.getElementById("extremeResult").innerHTML += "<p>Smallest digit is in Position 3</p>";
-        smallestPurchased = true;
-    }
-}
-
 function checkFinal(){
     if(!teamLocked){ alert("Lock team name first"); return; }
 
@@ -216,14 +258,27 @@ function checkFinal(){
 
     if(updateHP(10)){
         if(code === finalCode){
-            document.getElementById("finalResult").innerText = "✅ ACCESS GRANTED";
+            document.getElementById("finalResult").innerText = "ACCESS GRANTED";
+            sendToSheet();
         } else {
-            document.getElementById("finalResult").innerText = "❌ ACCESS DENIED";
+            document.getElementById("finalResult").innerText = "ACCESS DENIED";
         }
     }
 }
 
+function sendToSheet(){
+    fetch("PASTE_YOUR_SCRIPT_URL_HERE", {
+        method: "POST",
+        body: JSON.stringify({
+            team: localStorage.getItem("teamName"),
+            hp: hp
+        })
+    });
+}
+
 </script>
+
 
 </body>
 </html>
+
