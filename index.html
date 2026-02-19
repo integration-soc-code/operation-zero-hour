@@ -1,57 +1,105 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Operation Zero Hour - Code Alpha</title>
-    <style>
-        body { font-family: Arial; background:#111; color:#fff; padding:20px; }
-        button { padding:10px; margin:5px; }
-        input { padding:8px; }
-        .box { background:#222; padding:15px; margin:10px 0; border-radius:8px; }
-    </style>
+<title>Operation Zero Hour - Code Alpha</title>
+<style>
+body{
+    background: linear-gradient(black,#111);
+    color:#00ff66;
+    font-family: Arial, sans-serif;
+    padding:20px;
+}
+h1{
+    color:#ffcc00;
+}
+.box{
+    background:#1a1a1a;
+    border:2px solid #333;
+    padding:15px;
+    margin:15px 0;
+    border-radius:8px;
+}
+button{
+    background:#333;
+    color:#00ff66;
+    border:1px solid #00ff66;
+    padding:8px 12px;
+    margin-top:5px;
+    cursor:pointer;
+}
+button:hover{
+    background:#00ff66;
+    color:black;
+}
+input{
+    padding:5px;
+}
+.locked{
+    background:#555;
+    color:#ccc;
+    cursor:not-allowed;
+}
+</style>
 </head>
+
 <body>
 
-<h1>CODE ALPHA</h1>
-<h3>Remaining HP: <span id="hp">1200</span></h3>
+<h1>🔐 OPERATION ZERO HOUR</h1>
 
 <div class="box">
-<h2>Category A - Digit Elimination (30 HP)</h2>
-<button onclick="buyElimination()">Buy Elimination</button>
-<p id="elimResult"></p>
+<h3>Enter Team Name</h3>
+<input type="text" id="teamName">
+<button onclick="lockTeam()">Confirm</button>
+<p id="teamStatus"></p>
+</div>
+
+<h2>Remaining HP: <span id="hp">1000</span></h2>
+
+<div class="box">
+<h3>Category A – Digit Elimination (30 HP)</h3>
+<button onclick="buyElimination()">Purchase</button>
+<div id="elimResults"></div>
 </div>
 
 <div class="box">
-<h2>Category B - Position Query (25 HP)</h2>
+<h3>Category B – Position Query (25 HP)</h3>
 Digit: <input type="number" id="digit" min="0" max="9">
 Position (1-5): <input type="number" id="position" min="1" max="5">
-<button onclick="checkPosition()">Check</button>
+<button onclick="checkPosition()">Query</button>
 <p id="posResult"></p>
 </div>
 
 <div class="box">
-<h2>Category C - Sum Constraint (90 HP)</h2>
+<h3>Category C – Structural Constraint (90 HP)</h3>
 <button onclick="buySum()">Reveal Sum</button>
 <p id="sumResult"></p>
 </div>
 
 <div class="box">
-<h2>Category D - Extreme Position Clue (120 HP)</h2>
-<button onclick="buyExtreme()">Reveal Extreme Info</button>
+<h3>Category D – Extreme Value Intel (120 HP each)</h3>
+<button onclick="buyLargest()">Reveal Largest Position</button>
+<button onclick="buySmallest()">Reveal Smallest Position</button>
 <p id="extremeResult"></p>
 </div>
 
 <div class="box">
-<h2>Submit Final Code</h2>
+<h3>Check Final Code (10 HP)</h3>
 <input type="text" id="finalCode" maxlength="5">
-<button onclick="submitCode()">Submit</button>
+<button onclick="checkFinal()">Check</button>
 <p id="finalResult"></p>
 </div>
 
 <script>
 
-let hp = 1200;
+let hp = 1000;
+let teamLocked = false;
+
 let eliminationOrder = [9,4,0,2,6];
 let eliminationIndex = 0;
+
+let sumPurchased = false;
+let largestPurchased = false;
+let smallestPurchased = false;
 
 const finalCode = "75183";
 
@@ -60,28 +108,50 @@ function updateHP(cost){
         hp -= cost;
         document.getElementById("hp").innerText = hp;
         return true;
-    }
-    else{
+    } else {
         alert("Not enough HP");
         return false;
     }
 }
 
+function lockTeam(){
+    let name = document.getElementById("teamName").value;
+    if(name.trim() === ""){
+        alert("Enter team name");
+        return;
+    }
+    document.getElementById("teamName").disabled = true;
+    document.querySelector("#teamName + button").classList.add("locked");
+    document.querySelector("#teamName + button").disabled = true;
+    document.getElementById("teamStatus").innerText = "Team Locked: " + name;
+    teamLocked = true;
+}
+
 function buyElimination(){
+    if(!teamLocked){ alert("Lock team name first"); return; }
+
+    if(eliminationIndex >= eliminationOrder.length){
+        alert("No more digits available in Category A");
+        return;
+    }
+
     if(updateHP(30)){
-        if(eliminationIndex < eliminationOrder.length){
-            document.getElementById("elimResult").innerText =
-                "Digit NOT in code: " + eliminationOrder[eliminationIndex];
-            eliminationIndex++;
-        } else {
-            document.getElementById("elimResult").innerText = "No more eliminations available.";
-        }
+        let div = document.getElementById("elimResults");
+        div.innerHTML += "<p>Digit NOT in code: " + eliminationOrder[eliminationIndex] + "</p>";
+        eliminationIndex++;
     }
 }
 
 function checkPosition(){
+    if(!teamLocked){ alert("Lock team name first"); return; }
+
     let digit = document.getElementById("digit").value;
     let pos = document.getElementById("position").value - 1;
+
+    if(digit === "" || pos < 0 || pos > 4){
+        alert("Invalid input");
+        return;
+    }
 
     if(updateHP(25)){
         if(finalCode[pos] == digit){
@@ -93,24 +163,63 @@ function checkPosition(){
 }
 
 function buySum(){
+    if(!teamLocked){ alert("Lock team name first"); return; }
+
+    if(sumPurchased){
+        alert("Already purchased");
+        return;
+    }
+
     if(updateHP(90)){
         document.getElementById("sumResult").innerText = "Sum of digits = 24";
+        sumPurchased = true;
     }
 }
 
-function buyExtreme(){
+function buyLargest(){
+    if(!teamLocked){ alert("Lock team name first"); return; }
+
+    if(largestPurchased){
+        alert("Largest position already revealed");
+        return;
+    }
+
     if(updateHP(120)){
-        document.getElementById("extremeResult").innerText =
-            "Largest and smallest digits are at extreme ends (Position 1 or 5).";
+        document.getElementById("extremeResult").innerHTML += "<p>Largest digit is in Position 4</p>";
+        largestPurchased = true;
     }
 }
 
-function submitCode(){
+function buySmallest(){
+    if(!teamLocked){ alert("Lock team name first"); return; }
+
+    if(smallestPurchased){
+        alert("Smallest position already revealed");
+        return;
+    }
+
+    if(updateHP(120)){
+        document.getElementById("extremeResult").innerHTML += "<p>Smallest digit is in Position 3</p>";
+        smallestPurchased = true;
+    }
+}
+
+function checkFinal(){
+    if(!teamLocked){ alert("Lock team name first"); return; }
+
     let code = document.getElementById("finalCode").value;
-    if(code === finalCode){
-        document.getElementById("finalResult").innerText = "ACCESS GRANTED";
-    } else {
-        document.getElementById("finalResult").innerText = "ACCESS DENIED";
+
+    if(code.length !== 5){
+        alert("Enter 5-digit code");
+        return;
+    }
+
+    if(updateHP(10)){
+        if(code === finalCode){
+            document.getElementById("finalResult").innerText = "✅ ACCESS GRANTED";
+        } else {
+            document.getElementById("finalResult").innerText = "❌ ACCESS DENIED";
+        }
     }
 }
 
