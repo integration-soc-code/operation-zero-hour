@@ -267,7 +267,7 @@ function checkFinal(){
 }
 
 function sendToSheet(){
-    fetch("PASTE_YOUR_SCRIPT_URL_HERE", {
+    fetch("https://script.google.com/a/macros/imi.edu/s/AKfycbwle4-palzCErHBOIDfRGcyQQK5l_jhG6TqK13S8Ww81YyxkyGijAFlFXv_TUEg8aif/exec", {
         method: "POST",
         body: JSON.stringify({
             team: localStorage.getItem("teamName"),
