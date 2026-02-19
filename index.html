@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Operation Zero Hour - Code Alpha</title>
+    <style>
+        body { font-family: Arial; background:#111; color:#fff; padding:20px; }
+        button { padding:10px; margin:5px; }
+        input { padding:8px; }
+        .box { background:#222; padding:15px; margin:10px 0; border-radius:8px; }
+    </style>
+</head>
+<body>
+
+<h1>CODE ALPHA</h1>
+<h3>Remaining HP: <span id="hp">1200</span></h3>
+
+<div class="box">
+<h2>Category A - Digit Elimination (30 HP)</h2>
+<button onclick="buyElimination()">Buy Elimination</button>
+<p id="elimResult"></p>
+</div>
+
+<div class="box">
+<h2>Category B - Position Query (25 HP)</h2>
+Digit: <input type="number" id="digit" min="0" max="9">
+Position (1-5): <input type="number" id="position" min="1" max="5">
+<button onclick="checkPosition()">Check</button>
+<p id="posResult"></p>
+</div>
+
+<div class="box">
+<h2>Category C - Sum Constraint (90 HP)</h2>
+<button onclick="buySum()">Reveal Sum</button>
+<p id="sumResult"></p>
+</div>
+
+<div class="box">
+<h2>Category D - Extreme Position Clue (120 HP)</h2>
+<button onclick="buyExtreme()">Reveal Extreme Info</button>
+<p id="extremeResult"></p>
+</div>
+
+<div class="box">
+<h2>Submit Final Code</h2>
+<input type="text" id="finalCode" maxlength="5">
+<button onclick="submitCode()">Submit</button>
+<p id="finalResult"></p>
+</div>
+
+<script>
+
+let hp = 1200;
+let eliminationOrder = [9,4,0,2,6];
+let eliminationIndex = 0;
+
+const finalCode = "75183";
+
+function updateHP(cost){
+    if(hp >= cost){
+        hp -= cost;
+        document.getElementById("hp").innerText = hp;
+        return true;
+    }
+    else{
+        alert("Not enough HP");
+        return false;
+    }
+}
+
+function buyElimination(){
+    if(updateHP(30)){
+        if(eliminationIndex < eliminationOrder.length){
+            document.getElementById("elimResult").innerText =
+                "Digit NOT in code: " + eliminationOrder[eliminationIndex];
+            eliminationIndex++;
+        } else {
+            document.getElementById("elimResult").innerText = "No more eliminations available.";
+        }
+    }
+}
+
+function checkPosition(){
+    let digit = document.getElementById("digit").value;
+    let pos = document.getElementById("position").value - 1;
+
+    if(updateHP(25)){
+        if(finalCode[pos] == digit){
+            document.getElementById("posResult").innerText = "YES";
+        } else {
+            document.getElementById("posResult").innerText = "NO";
+        }
+    }
+}
+
+function buySum(){
+    if(updateHP(90)){
+        document.getElementById("sumResult").innerText = "Sum of digits = 24";
+    }
+}
+
+function buyExtreme(){
+    if(updateHP(120)){
+        document.getElementById("extremeResult").innerText =
+            "Largest and smallest digits are at extreme ends (Position 1 or 5).";
+    }
+}
+
+function submitCode(){
+    let code = document.getElementById("finalCode").value;
+    if(code === finalCode){
+        document.getElementById("finalResult").innerText = "ACCESS GRANTED";
+    } else {
+        document.getElementById("finalResult").innerText = "ACCESS DENIED";
+    }
+}
+
+</script>
+
+</body>
+</html>
