@@ -267,8 +267,12 @@ function checkFinal(){
 }
 
 function sendToSheet(){
-    fetch("https://script.google.com/a/macros/imi.edu/s/AKfycbwle4-palzCErHBOIDfRGcyQQK5l_jhG6TqK13S8Ww81YyxkyGijAFlFXv_TUEg8aif/exec", {
+    fetch("https://script.google.com/macros/s/AKfycbyo0VYPP1WGT3noBvRyWhnQEp9VTnG9hqJg0-5dR8AeoQAI4IWw9pWLbRZme3T4Tyqd/exec", {
         method: "POST",
+        mode: "no-cors",
+        headers: {
+            "Content-Type": "application/json"
+        },
         body: JSON.stringify({
             team: localStorage.getItem("teamName"),
             hp: hp
@@ -276,9 +280,11 @@ function sendToSheet(){
     });
 }
 
+
 </script>
 
 
 </body>
 </html>
+
 
