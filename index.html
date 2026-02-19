@@ -70,7 +70,7 @@ Position (1-5): <input type="number" id="position" min="1" max="5">
 </div>
 
 <div class="box">
-<h3>Category C – Structural Constraint (90 HP)</h3>
+<h3>Category C – Structural Constraint (150 HP)</h3>
 <button onclick="buySum()">Reveal Sum</button>
 <p id="sumResult"></p>
 </div>
@@ -187,7 +187,7 @@ function buySum(){
         return;
     }
 
-    if(updateHP(90)){
+    if(updateHP(150)){
         document.getElementById("sumResult").innerText = "Sum of digits = 24";
         localStorage.setItem("sumPurchased", "true");
         sumPurchased = true;
@@ -286,5 +286,6 @@ function sendToSheet(){
 
 </body>
 </html>
+
 
 
